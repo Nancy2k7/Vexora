@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A friendly communication-practice app for beginners." />
+    <title>Vexora — Practice at your pace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#home" aria-label="Vexora home"><span>✦</span>Vexora</a>
+        <div class="stats" aria-label="Your progress">
+          <span title="Practice streak">🔥 <strong id="streak-count">0</strong> day streak</span>
+          <span title="Coins earned">🪙 <strong id="coin-count">0</strong></span>
+        </div>
+      </header>
+
+      <section id="home" class="view active">
+        <div class="hero">
+          <div>
+            <p class="eyebrow">A gentle space to practise</p>
+            <h1>Find your voice,<br />one small step at a time.</h1>
+            <p class="hero-copy">Try a mock interview, speak through a prompt, or prepare for a group discussion—at your own pace.</p>
+            <button class="primary-button" data-go="practice">Start a practice session <span>→</span></button>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <div class="speech-bubble">You can do this.</div>
+            <div class="flower microphone" aria-label="Microphone">🎙️</div
+          </div>
+        </div>
+
+        <section class="section-block">
+          <div class="section-heading"><div><p class="eyebrow">Choose your practice</p><h2>A little practice goes a long way.</h2></div></div>
+          <div class="practice-grid">
+            <button class="practice-card lavender" data-go="interview"><span class="card-icon">💬</span><span><strong>Mock interview</strong><small>Answer friendly, common questions</small></span><b>→</b></button>
+            <button class="practice-card peach" data-go="speech"><span class="card-icon">🎙️</span><span><strong>Speech practice</strong><small>Build comfort speaking out loud</small></span><b>→</b></button>
+            <button class="practice-card mint" data-go="gd"><span class="card-icon">👥</span><span><strong>Group discussion</strong><small>Learn what to say in a group</small></span><b>→</b></button>
+             <button class="practice-card spot-card" data-go="spot"><span class="card-icon">🎤</span><span><strong>Speak on the Spot</strong><small>Get a topic and speak freely</small></span><b>→</b></button>
+          </div>
+        </section>
+
+        <section class="tip-card"><span>🌱</span><p><strong>Today’s gentle reminder</strong><br />You do not need to sound perfect. You only need to begin.</p></section>
+      </section>
+
+      <section id="practice" class="view page-view">
+        <button class="back-button" data-go="home">← Back home</button>
+        <p class="eyebrow">Choose one small step</p><h2>What feels good today?</h2>
+        <div class="practice-grid large-grid">
+          <button class="practice-card lavender" data-go="interview"><span class="card-icon">💬</span><span><strong>Mock interview</strong><small>5 easy questions · earn 10 coins</small></span><b>→</b></button>
+          <button class="practice-card peach" data-go="speech"><span class="card-icon">🎙️</span><span><strong>Speech practice</strong><small>One prompt · earn 8 coins</small></span><b>→</b></button>
+          <button class="practice-card mint" data-go="gd"><span class="card-icon">👥</span><span><strong>Group discussion</strong><small>Unlock with 20 coins</small></span><b>→</b></button>
+                <button class="practice-card spot-card" data-go="spot"><span class="card-icon">🎤</span><span><strong>Speak on the Spot</strong><small>105 surprise topics · earn 10 coins</small></span><b>→</b></button>
+        </div>
+      </section>
+
+      <section id="interview" class="view page-view session-view">
+        <button class="back-button" data-go="home">← Back home</button>
+        <p class="eyebrow">Mock interview · <span id="question-progress">1 of 5</span></p>
+        <div class="session-card lavender-border">
+          <span class="session-icon">💬</span><h2 id="interview-question">Tell me a little about yourself.</h2>
+          <p>Take a breath. There is no perfect answer—just share what feels true to you.</p>
+          <textarea id="interview-answer" placeholder="Type some notes here, or answer out loud…"></textarea>
+          <div class="session-actions"><button class="secondary-button" id="skip-question">Skip for now</button><button class="primary-button" id="next-question">Next question →</button></div>
+        </div>
+      </section>
+
+      <section id="speech" class="view page-view session-view">
+        <button class="back-button" data-go="home">← Back home</button>
+        <p class="eyebrow">Speech practice</p>
+        <div class="session-card peach-border">
+          <span class="session-icon">🎙️</span><h2 id="speech-prompt">Speak about a hobby you enjoy and why it makes you happy.</h2>
+          <p>Try speaking for one minute. A pause is completely okay.</p>
+          <div class="timer" id="timer" aria-live="polite">01:00</div>
+          <button class="primary-button" id="timer-button">Start timer</button>
+          <textarea id="speech-notes" placeholder="Optional: write a few thoughts before you speak…"></textarea>
+          <button class="secondary-button complete-button" id="complete-speech">I finished practising</button>
+        </div>
+      </section>
+
+      <section id="gd" class="view page-view session-view">
+        <button class="back-button" data-go="home">← Back home</button>
+        <p class="eyebrow">Group discussion</p>
+        <div class="session-card mint-border" id="gd-locked">
+          <span class="session-icon">🔒</span><h2>Unlock group discussion practice</h2>
+          <p>Earn 20 coins through interview and speech practice to unlock this activity.</p>
+          <p class="coin-note">You have <strong id="gd-coin-count">0</strong> / 20 coins.</p>
+          <button class="primary-button" data-go="practice">Earn coins</button>
+        </div>
+        <div class="session-card mint-border hidden" id="gd-unlocked">
+          <span class="session-icon">👥</span><h2>Should college attendance be compulsory?</h2>
+          <p>Try this simple structure: share your view, give one reason, then invite another person to speak.</p>
+          <div class="idea-box"><strong>You could begin with:</strong><br />“I think attendance is important because it helps students stay connected, but flexibility can help students with different needs.”</div>
+          <button class="primary-button" id="complete-gd">I practised this discussion</button>
+        </div>
+      </section>
+
+      <section id="progress" class="view page-view">
+        <button class="back-button" data-go="home">← Back home</button>
+        <p class="eyebrow">Your progress</p><h2>Every try is progress.</h2>
+        <div class="progress-grid">
+          <article><span>🔥</span><strong id="progress-streak">0</strong><small>day streak</small></article>
+          <article><span>🪙</span><strong id="progress-coins">0</strong><small>coins earned</small></article>
+          <article><span>🌼</span><strong id="progress-sessions">0</strong><small>sessions completed</small></article>
+        </div>
+      </section>
+      <section id="spot" class="view page-view session-view">
+        <button class="back-button" data-go="home">← Back home</button>
+        <p class="eyebrow">Impromptu speaking</p>
+        <h2>🎤 Speak on the Spot</h2>
+        <p class="spot-subtitle">You get the topic. You get the moment. Now speak.</p>
+        <div class="filters" aria-label="Topic filters">
+          <label>Difficulty <select id="spot-difficulty"><option>All Levels</option><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></label>
+          <label>Category <select id="spot-category"><option>All</option></select></label>
+          <label>Speaking time <select id="spot-duration"><option value="60">1 minute</option><option value="120" selected>2 minutes</option><option value="180">3 minutes</option><option value="300">5 minutes</option></select></label>
+        </div>
+        <div class="session-card spot-topic-card">
+          <div class="topic-meta"><span id="spot-category-label">Opinion</span><span id="spot-difficulty-label">Intermediate</span></div>
+          <h2 id="spot-topic">Loading your speaking challenge…</h2>
+          <p>Preparation: <strong id="spot-prep">15 seconds</strong> · Speaking time: <strong id="spot-speaking-time">2 minutes</strong></p>
+          <div class="spot-timers"><div><small>Prepare</small><strong id="prep-timer">00:15</strong></div><div><small>Speak</small><strong id="speaking-timer">02:00</strong></div></div>
+          <div id="recording-indicator" class="recording-indicator hidden">● Recording</div>
+          <div class="session-actions"><button class="secondary-button" id="new-topic">↻ New Topic</button><button class="primary-button" id="start-speaking">Start Speaking →</button></div>
+          <button class="secondary-button hidden" id="stop-recording">Stop recording</button>
+        </div>
+        <div class="session-card spot-result hidden" id="spot-result">
+          <span class="session-icon">✨</span><h2>Your response is ready!</h2><p id="recording-status">Your practice recording is saved in this browser tab.</p>
+          <div class="session-actions results-actions"><button class="secondary-button" id="replay-recording">▶ Replay</button><button class="secondary-button" id="view-transcript">View Transcript</button><button class="primary-button" id="analyze-response">Analyze with AI</button></div>
+          <button class="secondary-button complete-button" id="try-another-topic">Try Another Topic</button>
+          <audio id="recording-playback" class="hidden" controls></audio>
+          <div id="transcript-panel" class="idea-box hidden"></div>
+          <div id="analysis-panel" class="analysis-panel hidden"></div>
+        </div>
+      </section>
+      
+      
+      <nav class="bottom-nav" aria-label="Main navigation"><button class="nav-item active" data-go="home">⌂<span>Home</span></button><button class="nav-item" data-go="practice">✦<span>Practise</span></button><button class="nav-item" data-go="progress">◔<span>Progress</span></button></nav>
+    </main>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <script src="topics.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
