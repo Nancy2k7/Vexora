@@ -18,7 +18,9 @@ const topicGroups = {
 const difficultyCycle = ["Beginner","Intermediate","Advanced","Beginner","Intermediate","Advanced","Intermediate"];
 const TOPIC_BANK = Object.entries(topicGroups).flatMap(([category, topics]) => topics.map((topic, index) => ({ id: `${category.toLowerCase().replace(/[^a-z]+/g,"-")}-${index + 1}`, topic, category, difficulty: difficultyCycle[index], duration: 120 })));
 let currentSpotTopic = null;
-
+let mediaRecorder = null;
+let audioChunks = [];
+let recordedAudioURL = null;
 const questions = [
   "Tell me a little about yourself.",
   "What is one strength you are proud of?",
@@ -35,12 +37,30 @@ const dailyReminders = [
   "You are learning, not performing. Be kind to yourself today.",
   "Confidence grows every time you give yourself a chance."
 ];
-const state = JSON.parse(localStorage.getItem("talkBloomProgress")) || { coins: 0, sessions: 0, streak: 0, lastPractice: null };
+const emptyState = {
+  coins: 0,
+  sessions: 0,
+  streak: 0,
+  lastPractice: null
+};
+let isLoggedIn =
+  sessionStorage.getItem("vexoraLoggedIn") === "true";
+const state = isLoggedIn
+  ? JSON.parse(localStorage.getItem("vexoraProgress")) || { ...emptyState }
+  : { ...emptyState };
 let questionIndex = 0;
 let timeRemaining = 60;
 let timerId;
+let speakingTimerId = null;
+let speakingTimeRemaining = 60;
 
-function saveState() { localStorage.setItem("talkBloomProgress", JSON.stringify(state)); }
+function saveState() {
+  if (!isLoggedIn) return;
+  localStorage.setItem(
+    "vexoraProgress",
+    JSON.stringify(state)
+  );
+}
 function updateStats() {
   document.querySelectorAll("#coin-count, #gd-coin-count, #progress-coins").forEach(el => el.textContent = state.coins);
   document.querySelectorAll("#streak-count, #progress-streak").forEach(el => el.textContent = state.streak);
@@ -50,29 +70,161 @@ function updateStats() {
 }
 function showToast(message) { const toast = document.querySelector("#toast"); toast.textContent = message; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 3200); }
 function goTo(id) {
-  document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === id));
-  document.querySelectorAll(".nav-item").forEach(button => button.classList.toggle("active", button.dataset.go === id || (id !== "home" && button.dataset.go === "practice" && ["interview", "speech", "gd"].includes(id))));
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  if (id === "gd" || id === "progress") updateStats();
+  document.querySelectorAll(".view").forEach(view => {
+    view.classList.toggle("active", view.id === id);
+  });
+
+  document.querySelectorAll(".nav-item").forEach(button => {
+    button.classList.toggle(
+      "active",
+      button.dataset.go === id ||
+      (
+        id !== "home" &&
+        button.dataset.go === "practice" &&
+        ["interview", "speech", "gd", "spot"].includes(id)
+      )
+    );
+  });
+
+  document.querySelector(".app-shell").classList.toggle(
+    "login-mode",
+    id === "login"
+  );
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+  if (id === "gd" || id === "progress") {
+    updateStats();
+  }
 }
 function completePractice(coins, message) {
+
+  if (!isLoggedIn) {
+    showToast("Log in to save your progress.");
+    goTo("home");
+    return;
+  }
+
   const today = new Date().toDateString();
-  const yesterday = new Date(Date.now() - 86400000).toDateString();
-  if (state.lastPractice !== today) state.streak = state.lastPractice === yesterday ? state.streak + 1 : 1;
+  const yesterday = new Date(
+    Date.now() - 86400000
+  ).toDateString();
+
+  if (state.lastPractice !== today) {
+    state.streak =
+      state.lastPractice === yesterday
+        ? state.streak + 1
+        : 1;
+  }
   state.lastPractice = today;
   state.coins += coins;
   state.sessions += 1;
-  saveState(); updateStats(); showToast(`${message} You earned ${coins} coins!`); goTo("home");
+  saveState();
+  updateStats();
+  showToast(
+    `${message} You earned ${coins} coins!`
+  );
+  goTo("home");
 }
 function updateQuestion() { document.querySelector("#interview-question").textContent = questions[questionIndex]; document.querySelector("#question-progress").textContent = `${questionIndex + 1} of ${questions.length}`; document.querySelector("#interview-answer").value = ""; }
 function nextQuestion() { if (questionIndex < questions.length - 1) { questionIndex += 1; updateQuestion(); } else { questionIndex = 0; updateQuestion(); completePractice(10, "Wonderful work—your interview practice is complete."); } }
 function updateTimer() { const minutes = String(Math.floor(timeRemaining / 60)).padStart(2, "0"); const seconds = String(timeRemaining % 60).padStart(2, "0"); document.querySelector("#timer").textContent = `${minutes}:${seconds}`; }
+function updateSpotDuration() {
+  const duration = Number(
+    document.querySelector("#spot-duration").value);
+  const minutes = duration / 60;
 
+  document.querySelector("#spot-speaking-time").textContent =
+    `${minutes} minute${minutes !== 1 ? "s" : ""}`;
+
+  document.querySelector("#speaking-timer").textContent =
+    `${String(minutes).padStart(2, "0")}:00`;
+}
 function setDailyReminder() {
   const today = new Date();
   const dayNumber = Math.floor(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) / 86400000);
   document.querySelector("#daily-reminder").textContent = dailyReminders[dayNumber % dailyReminders.length];
 }
+function populateSpotCategories() {
+  const categorySelect = document.querySelector("#spot-category");
+
+  Object.keys(topicGroups).forEach(category => {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category;
+    categorySelect.appendChild(option);
+  });
+}
+function getRandomSpotTopic() {
+  const difficulty = document.querySelector("#spot-difficulty").value;
+  const category = document.querySelector("#spot-category").value;
+  let availableTopics = TOPIC_BANK;
+  if (difficulty !== "All Levels") {availableTopics = availableTopics.filter(topic => topic.difficulty === difficulty);}
+  if (category !== "All") {availableTopics = availableTopics.filter(topic => topic.category === category);}
+  if (availableTopics.length === 0) return;
+  const topicElement = document.querySelector("#spot-topic");
+  let flashes = 0;
+  const totalFlashes = 20;
+  function spin() {const randomTopic =availableTopics[Math.floor(Math.random() * availableTopics.length)];topicElement.textContent = randomTopic.topic;
+   flashes++;
+   if (flashes >= totalFlashes) {currentSpotTopic =availableTopics[Math.floor(Math.random() * availableTopics.length)];
+    topicElement.textContent = currentSpotTopic.topic;
+    document.querySelector("#spot-category-label").textContent =currentSpotTopic.category;
+    document.querySelector("#spot-difficulty-label").textContent =currentSpotTopic.difficulty;return;}
+    const delay = 60 + flashes * 15;
+    setTimeout(spin, delay);}
+    spin();
+}
+function updateSpeakingTimer() {const minutes = String(Math.floor(speakingTimeRemaining / 60)).padStart(2, "0");
+  const seconds = String(speakingTimeRemaining % 60).padStart(2, "0");
+  document.querySelector("#spot-live-timer").textContent =`${minutes}:${seconds}`;
+}
+function startSpeakingSession() {if (!currentSpotTopic) {getRandomSpotTopic();}
+const duration =Number(document.querySelector("#spot-duration").value);
+speakingTimeRemaining = duration;
+document.querySelector("#active-speaking-topic").textContent =currentSpotTopic.topic;
+document.querySelector("#speaking-status").textContent ="🎤 Speak now!";
+updateSpeakingTimer();
+goTo("speaking-page");
+navigator.mediaDevices.getUserMedia({ audio: true })
+  .then(stream => {
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = event => {
+      if (event.data.size > 0) {
+        audioChunks.push(event.data);
+      }
+    };
+    mediaRecorder.start();
+    document.querySelector("#speaking-status").textContent =
+      "Recording... Speak now!";
+  })
+  .catch(error => {
+    console.error("Microphone error:", error);
+    document.querySelector("#speaking-status").textContent =
+      "Microphone access was denied.";
+  });
+clearInterval(speakingTimerId);
+speakingTimerId = setInterval(() => {speakingTimeRemaining--;
+updateSpeakingTimer();
+if (speakingTimeRemaining <= 0) {
+      finishSpeakingSession();
+    }
+  }, 1000);
+}
+function finishSpeakingSession() {clearInterval(speakingTimerId);speakingTimerId = null;
+document.querySelector("#speaking-status").textContent ="✨ Speaking session complete!";
+document.querySelector("#finish-speaking").textContent="Done";
+}
+document.querySelector("#start-speaking").addEventListener("click",startSpeakingSession);
+document.querySelector("#finish-speaking").addEventListener("click",finishSpeakingSession);
+document.querySelector("#new-topic").addEventListener("click", getRandomSpotTopic);
+document.querySelector("#spot-difficulty").addEventListener("change", getRandomSpotTopic);
+document.querySelector("#spot-category").addEventListener("change", getRandomSpotTopic);
+document.querySelector("#spot-duration").addEventListener("change", updateSpotDuration);
 document.querySelectorAll("[data-go]").forEach(button => button.addEventListener("click", () => goTo(button.dataset.go)));
 document.querySelector("#next-question").addEventListener("click", nextQuestion);
 document.querySelector("#skip-question").addEventListener("click", nextQuestion);
@@ -83,4 +235,6 @@ document.querySelector("#timer-button").addEventListener("click", event => {
 });
 document.querySelector("#complete-speech").addEventListener("click", () => { clearInterval(timerId); timerId = null; timeRemaining = 60; updateTimer(); document.querySelector("#timer-button").textContent = "Start timer"; document.querySelector("#speech-notes").value = ""; completePractice(8, "You showed up and spoke—that is progress."); });
 document.querySelector("#complete-gd").addEventListener("click", () => completePractice(6, "Great job practising your group-discussion voice."));
-updateQuestion(); updateTimer(); updateStats(); setDailyReminder();
+populateSpotCategories();
+getRandomSpotTopic();
+updateQuestion();updateTimer();updateStats();setDailyReminder();updateSpotDuration();

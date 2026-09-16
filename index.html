@@ -11,21 +11,164 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+
     <main class="app-shell">
       <header class="topbar">
-        <a class="brand" href="#home" aria-label="Vexora home"><span>✦</span>Vexora</a>
-        <div class="stats" aria-label="Your progress">
-          <span title="Practice streak">🔥 <strong id="streak-count">0</strong> day streak</span>
-          <span title="Coins earned">🪙 <strong id="coin-count">0</strong></span>
-        </div>
-      </header>
 
+  <a class="brand" href="#home" aria-label="Vexora home">
+    <span>✦</span>Vexora
+  </a>
+
+  <div class="topbar-right">
+
+    <div class="stats" aria-label="Your progress">
+      <span title="Practice streak">
+        🔥 <strong id="streak-count">0</strong> day streak
+      </span>
+
+      <span title="Coins earned">
+        🪙 <strong id="coin-count">0</strong>
+      </span>
+    </div>
+
+    <button class="login-top-button" data-go="login">
+      Log in
+    </button>
+
+  </div>
+
+</header>
+      <section id="login" class="view login-page">
+        <div class="login-card">
+          <a href="#" class="brand login-brand">Vex<span>ora</span></a>
+          <p class="eyebrow">Welcome back</p>
+          <h1>Ready to find your voice?</h1>
+          <p class="login-subtitle">Continue your communication journey with Vexora.</p>
+          <form id="login-form">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" placeholder="you@example.com" required>
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password"  placeholder="Enter your password" required>
+        <div class="login-options">
+          <label class="remember-me">
+            <input type="checkbox">Remember me</label>
+        <button type="button" id="forgot-password">Forgot password?</button>
+        </div>
+        <button type="submit" class="primary-button login-button">Log in →</button>
+      </form>
+    <div class="login-divider">
+      <span>or</span>
+    </div>
+    <p class="signup-text">
+      New to Vexora?
+      <button type="button" id="show-signup" data-go="signup">Create an account</button>
+    </p>
+      <button type="button" id="back-to-login" data-go="login">Log in</button>
+  </div>
+</section>
+<section id="signup" class="view login-page">
+  <div class="login-card">
+
+    <a href="#" class="brand login-brand">Vex<span>ora</span></a>
+
+    <p class="eyebrow">Create your account</p>
+
+    <h1>Let's get to know you.</h1>
+
+    <p class="login-subtitle">
+      First things first — what should we call you?
+    </p>
+
+    <form id="signup-name-form">
+
+      <label for="signup-name">Your name</label>
+
+      <input
+        type="text"
+        id="signup-name"
+        placeholder="Enter your name"
+        required
+      >
+      <section id="contact" class="view login-page">
+  <div class="login-card">
+
+    <a href="#" class="brand login-brand">Vex<span>ora</span></a>
+
+    <p class="eyebrow">Create your account</p>
+
+    <h1>How should we verify you?</h1>
+
+    <p class="login-subtitle">
+      Choose an email or phone number to secure your Vexora account.
+    </p>
+
+    <form id="contact-form">
+
+      <div class="contact-choice">
+        <label>
+          <input type="radio" name="contact-method" value="email" checked>
+          <span>Email</span>
+        </label>
+
+        <label>
+          <input type="radio" name="contact-method" value="phone">
+          <span>Phone</span>
+        </label>
+      </div>
+
+      <label for="contact-value" id="contact-label">
+        Email address
+      </label>
+
+      <input
+        type="email"
+        id="contact-value"
+        placeholder="you@example.com"
+        required
+      >
+
+      <button type="submit" class="primary-button login-button">
+        Send verification code →
+      </button>
+
+    </form>
+    <button
+  type="button"
+  class="back-login-button"
+  data-go="signup"
+  aria-label="Back to create account"
+>
+  ← Back
+</button>
+
+
+  </div>
+</section>
+
+      <button type="submit" class="primary-button login-button">
+        Continue →
+      </button>
+
+    </form>
+
+    <p class="signup-text">
+      Already have an account?
+      <button type="button" id="back-to-login" data-go="login">Log in</button>
+    </p>
+
+    <button class="back-login-button" data-go="home">
+      ← Back to home
+    </button>
+
+  </div>
+</section>
+      </section>
       <section id="home" class="view active">
         <div class="hero">
           <div>
             <p class="eyebrow">A gentle space to practise</p>
             <h1>Find your voice,<br />one small step at a time.</h1>
-            <p class="hero-copy">Try a mock interview, speak through a prompt, or prepare for a group discussion—at your own pace.</p>
+            <p class="hero-copy">Try a mock interview, speak through a prompt, or prepare for a group discussion at your own pace.</p>
             <button class="primary-button" data-go="practice">Start a practice session <span>→</span></button>
           </div>
           <div class="hero-art" aria-hidden="true">
@@ -136,6 +279,20 @@
           <div id="analysis-panel" class="analysis-panel hidden"></div>
         </div>
       </section>
+      <section id="speaking-page" class="view page-view session-view">
+        <button class="back-button" data-go="spot">← Back</button>
+        <p class="eyebrow">Your speaking challenge</p>
+        <h2 id="active-speaking-topic">Your topic</h2>
+        <p class="speaking-instruction">Take a breath, gather your thoughts, and speak naturally.</p>
+        <div class="speaking-timer-card"><p>Speaking time</p>
+    <strong id="spot-live-timer">02:00</strong>
+  </div>
+  <div class="speaking-status" id="speaking-status">
+    Get ready...
+  </div>
+  <button class="primary-button" id="finish-speaking">
+    Finish Speaking
+  </button></section>
       
       
       <nav class="bottom-nav" aria-label="Main navigation"><button class="nav-item active" data-go="home">⌂<span>Home</span></button><button class="nav-item" data-go="practice">✦<span>Practise</span></button><button class="nav-item" data-go="progress">◔<span>Progress</span></button></nav>
